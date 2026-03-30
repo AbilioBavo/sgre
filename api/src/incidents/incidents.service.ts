@@ -4,7 +4,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { CreateIncidentDto } from './dto/create-incident.dto';
 import { UpdateIncidentStatusDto } from './dto/update-incident.dto';
 import { IncidentsGateway } from './incidents.gateway';
-import { IncidentMapItem, IncidentStatus } from './incidents.types';
+import { IncidentMapItem, IncidentStatus, IncidentType } from './incidents.types';
 
 @Injectable()
 export class IncidentsService {
@@ -27,22 +27,16 @@ export class IncidentsService {
         ${createIncidentDto.userId ?? null},
         now()
       )
-      RETURNING
-        "id",
-        "type",
-        "description",
-        "severity",
-        "status",
-        ST_Y("location")::double precision AS "lat",
-        ST_X("location")::double precision AS "lng",
-        "createdAt"
+      RETURNING "id", "type", "description", "severity", "status",
+      ST_Y("location")::double precision AS "lat",
+      ST_X("location")::double precision AS "lng", "createdAt"
     `);
 
     return incident[0];
   }
 
-  async findAll(status?: IncidentStatus): Promise<IncidentMapItem[]> {
-    return this.listIncidents(status);
+  async findAll(status?: IncidentStatus, type?: IncidentType): Promise<IncidentMapItem[]> {
+    return this.listIncidents(status, type);
   }
 
   async findVerifiedForMap(): Promise<IncidentMapItem[]> {
@@ -51,86 +45,57 @@ export class IncidentsService {
 
   async findOne(id: string): Promise<IncidentMapItem> {
     const incident = await this.prisma.$queryRaw<IncidentMapItem[]>(Prisma.sql`
-      SELECT
-        "id",
-        "type",
-        "description",
-        "severity",
-        "status",
-        ST_Y("location")::double precision AS "lat",
-        ST_X("location")::double precision AS "lng",
-        "createdAt"
-      FROM "Incident"
-      WHERE "id" = ${id}
-      LIMIT 1
+      SELECT "id", "type", "description", "severity", "status",
+      ST_Y("location")::double precision AS "lat",
+      ST_X("location")::double precision AS "lng", "createdAt"
+      FROM "Incident" WHERE "id" = ${id} LIMIT 1
     `);
 
-    if (!incident[0]) {
-      throw new NotFoundException('Incidente não encontrado');
-    }
-
+    if (!incident[0]) throw new NotFoundException('Incidente não encontrado');
     return incident[0];
   }
 
   async updateStatus(id: string, updateDto: UpdateIncidentStatusDto): Promise<IncidentMapItem> {
     const [current] = await this.prisma.$queryRaw<{ id: string; status: IncidentStatus }[]>(Prisma.sql`
-      SELECT "id", "status"
-      FROM "Incident"
-      WHERE "id" = ${id}
-      LIMIT 1
+      SELECT "id", "status" FROM "Incident" WHERE "id" = ${id} LIMIT 1
     `);
 
-    if (!current) {
-      throw new NotFoundException('Incidente não encontrado');
-    }
-
+    if (!current) throw new NotFoundException('Incidente não encontrado');
     if (current.status === IncidentStatus.RESOLVED && updateDto.status === IncidentStatus.PENDING) {
       throw new BadRequestException('Incidente resolvido não pode voltar para pendente');
     }
 
     const [incident] = await this.prisma.$queryRaw<IncidentMapItem[]>(Prisma.sql`
       UPDATE "Incident"
-      SET
-        "status" = ${updateDto.status}::"IncidentStatus",
-        "verified" = ${updateDto.status === IncidentStatus.VERIFIED}
+      SET "status" = ${updateDto.status}::"IncidentStatus",
+      "verified" = ${updateDto.status === IncidentStatus.VERIFIED}
       WHERE "id" = ${id}
-      RETURNING
-        "id",
-        "type",
-        "description",
-        "severity",
-        "status",
-        ST_Y("location")::double precision AS "lat",
-        ST_X("location")::double precision AS "lng",
-        "createdAt"
+      RETURNING "id", "type", "description", "severity", "status",
+      ST_Y("location")::double precision AS "lat",
+      ST_X("location")::double precision AS "lng", "createdAt"
     `);
 
-    if (updateDto.status === IncidentStatus.VERIFIED) {
-      this.incidentsGateway.emitVerifiedIncident(incident);
-    }
-
-    if (updateDto.status === IncidentStatus.RESOLVED) {
-      this.incidentsGateway.emitResolvedIncident(incident.id);
-    }
+    if (updateDto.status === IncidentStatus.VERIFIED) this.incidentsGateway.emitVerifiedIncident(incident);
+    if (updateDto.status === IncidentStatus.RESOLVED) this.incidentsGateway.emitResolvedIncident(incident.id);
 
     return incident;
   }
 
-  private async listIncidents(status?: IncidentStatus): Promise<IncidentMapItem[]> {
-    const whereClause = status
-      ? Prisma.sql`WHERE "status" = ${status}::"IncidentStatus"`
-      : Prisma.empty;
+  private async listIncidents(status?: IncidentStatus, type?: IncidentType): Promise<IncidentMapItem[]> {
+    const whereStatus = status ? Prisma.sql`"status" = ${status}::"IncidentStatus"` : Prisma.empty;
+    const whereType = type ? Prisma.sql`"type" = ${type}::"IncidentType"` : Prisma.empty;
+    const whereClause = status && type
+      ? Prisma.sql`WHERE ${whereStatus} AND ${whereType}`
+      : status
+        ? Prisma.sql`WHERE ${whereStatus}`
+        : type
+          ? Prisma.sql`WHERE ${whereType}`
+          : Prisma.empty;
 
     return this.prisma.$queryRaw<IncidentMapItem[]>(Prisma.sql`
-      SELECT
-        "id",
-        "type",
-        "description",
-        "severity",
-        "status",
-        ST_Y("location")::double precision AS "lat",
-        ST_X("location")::double precision AS "lng",
-        "createdAt"
+      SELECT "id", "type", "description", "severity", "status",
+      ST_Y("location")::double precision AS "lat",
+      ST_X("location")::double precision AS "lng", "createdAt"
       FROM "Incident"
       ${whereClause}
       ORDER BY "createdAt" DESC

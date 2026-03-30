@@ -2,7 +2,7 @@ import { Body, Controller, Get, Param, Patch, Post, Query } from '@nestjs/common
 import { IncidentsService } from './incidents.service';
 import { CreateIncidentDto } from './dto/create-incident.dto';
 import { UpdateIncidentStatusDto } from './dto/update-incident.dto';
-import { IncidentStatus } from './incidents.types';
+import { IncidentStatus, IncidentType } from './incidents.types';
 
 @Controller('incidents')
 export class IncidentsController {
@@ -14,8 +14,8 @@ export class IncidentsController {
   }
 
   @Get()
-  findAll(@Query('status') status?: IncidentStatus) {
-    return this.incidentsService.findAll(status);
+  findAll(@Query('status') status?: IncidentStatus, @Query('type') type?: IncidentType) {
+    return this.incidentsService.findAll(status, type);
   }
 
   @Get('map')
