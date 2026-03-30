@@ -1,0 +1,219 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+//USERS
+
+model User {
+  id               String   @id @default(uuid())
+  name             String
+  phone            String   @unique
+  role             Role     @default(USER)
+
+  // localização em tempo real
+  currentLocation  Unsupported("geometry(Point, 4326)")?
+  lastSeenAt       DateTime?
+
+  createdAt        DateTime @default(now())
+
+  reports          Incident[]
+  devices          Device[]
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+//DEVICES (PUSH NOTIFICATIONS)
+
+model Device {
+  id        String @id @default(uuid())
+  userId    String
+  token     String
+
+  user      User   @relation(fields: [userId], references: [id])
+
+  createdAt DateTime @default(now())
+}
+
+//SHELTERS (ABRIGOS)
+
+model Shelter {
+  id          String   @id @default(uuid())
+  name        String
+  capacity    Int
+  occupied    Int      @default(0)
+  status      ShelterStatus @default(OPEN)
+
+  // localização geográfica
+  location    Unsupported("geometry(Point, 4326)")
+
+  createdAt   DateTime @default(now())
+}
+
+enum ShelterStatus {
+  OPEN
+  FULL
+  CLOSED
+}
+
+//INCIDENTS (REPORTS)
+
+model Incident {
+  id          String   @id @default(uuid())
+  type        IncidentType
+  description String?
+  severity    Int      // 1–5
+
+  // localização
+  location    Unsupported("geometry(Point, 4326)")
+
+  status      IncidentStatus @default(PENDING)
+  verified    Boolean        @default(false)
+
+  userId      String?
+  user        User?    @relation(fields: [userId], references: [id])
+
+  createdAt   DateTime @default(now())
+}
+
+enum IncidentType {
+  FLOOD
+  BLOCKED_ROAD
+  ACCIDENT
+  FIRE
+  OTHER
+}
+
+enum IncidentStatus {
+  PENDING
+  VERIFIED
+  REJECTED
+  RESOLVED
+}
+
+//WEATHER / RISK DATA
+
+model WeatherData {
+  id          String   @id @default(uuid())
+  zone        String
+  rainfall    Float
+  windSpeed   Float
+  riskLevel   RiskLevel
+  recordedAt  DateTime @default(now())
+}
+
+enum RiskLevel {
+  LOW
+  MEDIUM
+  HIGH
+}
+
+//RISK ZONES (ZONAS DE PERIGO)
+
+model RiskZone {
+  id          String   @id @default(uuid())
+  name        String
+  riskLevel   RiskLevel
+
+  // área geográfica
+  area        Unsupported("geometry(Polygon, 4326)")
+
+  updatedAt   DateTime @updatedAt
+}
+
+//ROADS (ESTRADAS)
+
+model Road {
+  id          String   @id @default(uuid())
+  name        String?
+  type        RoadType
+
+  isBlocked   Boolean  @default(false)
+  condition   RoadCondition @default(NORMAL)
+
+  // linha geográfica
+  path        Unsupported("geometry(LineString, 4326)")
+
+  updatedAt   DateTime @updatedAt
+}
+
+enum RoadType {
+  PRIMARY
+  SECONDARY
+  TERTIARY
+  DIRT
+}
+
+enum RoadCondition {
+  NORMAL
+  FLOODED
+  DAMAGED
+  BLOCKED
+}
+
+//ROUTES (ROTAS CALCULADAS)
+
+model Route {
+  id        String   @id @default(uuid())
+
+  // geometria da rota
+  geometry  Unsupported("geometry(LineString, 4326)")
+
+  distance  Float
+  duration  Float
+  riskScore Float
+
+  createdAt DateTime @default(now())
+}
+
+//ROUTES CACHE (OTIMIZAÇÃO)
+
+model RouteCache {
+  id          String   @id @default(uuid())
+
+  startLat    Float
+  startLng    Float
+  endLat      Float
+  endLng      Float
+
+  distance    Float
+  duration    Float
+  riskScore   Float
+
+  createdAt   DateTime @default(now())
+}
+
+//ALERTS (COMUNICAÇÃO COM USUÁRIOS)
+
+model Alert {
+  id        String   @id @default(uuid())
+  title     String
+  message   String
+  severity  RiskLevel
+
+  // área afetada (opcional)
+  area      Unsupported("geometry(Polygon, 4326)")?
+
+  createdAt DateTime @default(now())
+}
+
+//EVENT LOG (AUDITORIA)
+
+model EventLog {
+  id          String   @id @default(uuid())
+  type        String
+  payload     Json
+  createdAt   DateTime @default(now())
+}
