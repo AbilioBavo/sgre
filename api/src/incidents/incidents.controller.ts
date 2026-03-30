@@ -1,7 +1,8 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Body, Controller, Get, Param, Patch, Post, Query } from '@nestjs/common';
 import { IncidentsService } from './incidents.service';
 import { CreateIncidentDto } from './dto/create-incident.dto';
-import { UpdateIncidentDto } from './dto/update-incident.dto';
+import { UpdateIncidentStatusDto } from './dto/update-incident.dto';
+import { IncidentStatus, IncidentType } from './incidents.types';
 
 @Controller('incidents')
 export class IncidentsController {
@@ -13,22 +14,22 @@ export class IncidentsController {
   }
 
   @Get()
-  findAll() {
-    return this.incidentsService.findAll();
+  findAll(@Query('status') status?: IncidentStatus, @Query('type') type?: IncidentType) {
+    return this.incidentsService.findAll(status, type);
+  }
+
+  @Get('map')
+  findVerifiedForMap() {
+    return this.incidentsService.findVerifiedForMap();
   }
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.incidentsService.findOne(+id);
+    return this.incidentsService.findOne(id);
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateIncidentDto: UpdateIncidentDto) {
-    return this.incidentsService.update(+id, updateIncidentDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.incidentsService.remove(+id);
+  @Patch(':id/status')
+  updateStatus(@Param('id') id: string, @Body() updateIncidentDto: UpdateIncidentStatusDto) {
+    return this.incidentsService.updateStatus(id, updateIncidentDto);
   }
 }

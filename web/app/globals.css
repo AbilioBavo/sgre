@@ -1,0 +1,12 @@
+:root{--bg:#f1f5f9;--surface:#fff;--txt:#0f172a;--muted:#475569;--ok:#16a34a;--warn:#eab308;--danger:#dc2626}
+*{box-sizing:border-box}body{margin:0;font-family:Inter,Arial,sans-serif;background:var(--bg);color:var(--txt)}
+a{text-decoration:none;color:inherit}
+.container{max-width:1200px;margin:0 auto;padding:16px}.panel{background:var(--surface);border-radius:14px;padding:16px;box-shadow:0 6px 20px rgba(2,6,23,.08)}
+.topnav{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:16px}.topnav a{padding:8px 12px;border-radius:999px;background:#e2e8f0;font-weight:600}
+.grid{display:grid;gap:16px}.grid-2{grid-template-columns:repeat(auto-fit,minmax(260px,1fr))}
+.cta{background:var(--danger);border:0;color:#fff;padding:14px 18px;border-radius:12px;font-weight:700;cursor:pointer}
+.badge{display:inline-block;padding:4px 10px;border-radius:999px;font-size:12px;font-weight:700}.LOW{background:#dcfce7;color:#14532d}.MEDIUM{background:#fef9c3;color:#854d0e}.HIGH{background:#fee2e2;color:#991b1b}
+.mapWrap{height:calc(100vh - 130px);border-radius:16px;overflow:hidden}
+.form{display:grid;gap:10px} input,select,textarea{padding:10px;border-radius:10px;border:1px solid #cbd5e1}
+.helper{color:var(--muted);font-size:14px}
+.routeCard{border-left:4px solid #94a3b8;padding-left:12px}

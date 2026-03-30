@@ -1,7 +1,6 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
-import { SheltersService } from './shelters.service';
+import { Body, Controller, Get, Post } from '@nestjs/common';
 import { CreateShelterDto } from './dto/create-shelter.dto';
-import { UpdateShelterDto } from './dto/update-shelter.dto';
+import { SheltersService } from './shelters.service';
 
 @Controller('shelters')
 export class SheltersController {
@@ -15,20 +14,5 @@ export class SheltersController {
   @Get()
   findAll() {
     return this.sheltersService.findAll();
-  }
-
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.sheltersService.findOne(+id);
-  }
-
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateShelterDto: UpdateShelterDto) {
-    return this.sheltersService.update(+id, updateShelterDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.sheltersService.remove(+id);
   }
 }

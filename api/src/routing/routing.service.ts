@@ -1,26 +1,44 @@
 import { Injectable } from '@nestjs/common';
+import { IncidentsService } from '../incidents/incidents.service';
+import { IncidentStatus } from '../incidents/incidents.types';
 import { CreateRoutingDto } from './dto/create-routing.dto';
-import { UpdateRoutingDto } from './dto/update-routing.dto';
 
 @Injectable()
 export class RoutingService {
-  create(createRoutingDto: CreateRoutingDto) {
-    return 'This action adds a new routing';
-  }
+  constructor(private readonly incidentsService: IncidentsService) {}
 
-  findAll() {
-    return `This action returns all routing`;
-  }
+  async getEvacuationRoutes(dto: CreateRoutingDto) {
+    const verifiedIncidents = await this.incidentsService.findAll(IncidentStatus.VERIFIED);
 
-  findOne(id: number) {
-    return `This action returns a #${id} routing`;
-  }
+    const riskPenalty = verifiedIncidents.length * 3;
 
-  update(id: number, updateRoutingDto: UpdateRoutingDto) {
-    return `This action updates a #${id} routing`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} routing`;
+    return {
+      safest: {
+        id: 'safest',
+        label: 'Rota mais segura',
+        etaMinutes: 24 + riskPenalty,
+        distanceKm: 7.2,
+        riskScore: Math.max(1, 20 - riskPenalty),
+      },
+      fastest: {
+        id: 'fastest',
+        label: 'Rota mais rápida',
+        etaMinutes: 13 + Math.ceil(riskPenalty / 2),
+        distanceKm: 5.1,
+        riskScore: 32 + riskPenalty,
+      },
+      alternative: {
+        id: 'alternative',
+        label: 'Rota alternativa',
+        etaMinutes: 17 + Math.ceil(riskPenalty / 3),
+        distanceKm: 6.3,
+        riskScore: 26 + riskPenalty,
+      },
+      context: {
+        start: { lat: dto.startLat, lng: dto.startLng },
+        destination: { lat: dto.endLat, lng: dto.endLng },
+        verifiedIncidentsConsidered: verifiedIncidents.length,
+      },
+    };
   }
 }
