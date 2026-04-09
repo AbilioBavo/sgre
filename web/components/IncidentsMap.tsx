@@ -11,6 +11,7 @@ import { apiClient } from '../lib/api-client';
 import { env } from '../lib/env';
 import { Incident, Shelter } from '../lib/types';
 import { useGeolocation } from '../hooks/useGeolocation';
+import { useReverseGeocode } from '../hooks/useReverseGeocode';
 
 const maputoCenter: [number, number] = [-25.9653, 32.5892];
 const colors = {
@@ -71,6 +72,7 @@ function haversineDistance(lat1: number, lng1: number, lat2: number, lng2: numbe
 
 export function IncidentsMap() {
   const geo = useGeolocation();
+  const reverse = useReverseGeocode(geo.coords);
   const [incidents, setIncidents] = useState<Incident[]>([]);
   const [shelters, setShelters] = useState<Shelter[]>([]);
 
@@ -105,11 +107,21 @@ export function IncidentsMap() {
 
   const openShelters = shelters.filter((shelter) => shelter.status === 'OPEN').length;
 
+
+  const currentAddress = useMemo(() => {
+    if (geo.loading) return 'A obter GPS...';
+    if (!geo.coords) return 'Localização indisponível.';
+    if (reverse.loading) return 'A converter coordenadas em endereço completo...';
+    if (reverse.fullAddress) return reverse.fullAddress;
+    return reverse.error ?? `${geo.coords.lat.toFixed(5)}, ${geo.coords.lng.toFixed(5)}`;
+  }, [geo.coords, geo.loading, reverse.error, reverse.fullAddress, reverse.loading]);
+
   return (
     <div className="mapLayout">
       <aside className="mapSidebar panel premiumPanel">
         <h2>Resposta inteligente</h2>
         <p className="helper">Sua posição é marcada em verde. Os 3 abrigos mais próximos são listados abaixo.</p>
+        <p className="helper"><strong>Endereço atual:</strong> {currentAddress}</p>
 
         <div className="legendList">
           <p><span className="legendDot userDot" /> Você</p>

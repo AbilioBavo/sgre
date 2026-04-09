@@ -1,8 +1,4 @@
-import dynamic from 'next/dynamic';
-
-const DynamicMap = dynamic(() => import('../../components/IncidentsMap').then((mod) => mod.IncidentsMap), {
-  ssr: false,
-});
+import { IncidentsMap } from '../../components/IncidentsMap';
 
 export default function MapPage() {
   return (
@@ -13,7 +9,7 @@ export default function MapPage() {
           Visualize sua localização atual, incidentes verificados e os abrigos mais próximos em tempo real.
         </p>
       </header>
-      <DynamicMap />
+      <IncidentsMap />
     </section>
   );
 }
