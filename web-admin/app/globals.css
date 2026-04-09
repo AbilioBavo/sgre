@@ -153,3 +153,9 @@ body{
   .layout{grid-template-columns:1fr}
   .sidebar{position:relative;height:auto}
 }
+
+
+.adminLeafletMap{border-radius:14px}
+.adminMapWrap .leaflet-container{background:#dbeafe}
+.adminMapWrap .leaflet-popup-content-wrapper{border-radius:10px}
+.adminMapWrap .leaflet-control-attribution{font-size:10px}
