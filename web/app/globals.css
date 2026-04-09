@@ -1,12 +1,91 @@
-:root{--bg:#f1f5f9;--surface:#fff;--txt:#0f172a;--muted:#475569;--ok:#16a34a;--warn:#eab308;--danger:#dc2626}
-*{box-sizing:border-box}body{margin:0;font-family:Inter,Arial,sans-serif;background:var(--bg);color:var(--txt)}
+:root{
+  --bg:#eef3ff;
+  --surface:#ffffff;
+  --txt:#0f172a;
+  --muted:#475569;
+  --ok:#16a34a;
+  --warn:#eab308;
+  --danger:#dc2626;
+  --accent:#4f46e5;
+}
+
+*{box-sizing:border-box}
+
+body{
+  margin:0;
+  font-family:Inter,Arial,sans-serif;
+  background:radial-gradient(circle at top,#f8fbff,#eef3ff 48%,#e9edf9);
+  color:var(--txt);
+}
+
 a{text-decoration:none;color:inherit}
-.container{max-width:1200px;margin:0 auto;padding:16px}.panel{background:var(--surface);border-radius:14px;padding:16px;box-shadow:0 6px 20px rgba(2,6,23,.08)}
-.topnav{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:16px}.topnav a{padding:8px 12px;border-radius:999px;background:#e2e8f0;font-weight:600}
-.grid{display:grid;gap:16px}.grid-2{grid-template-columns:repeat(auto-fit,minmax(260px,1fr))}
+
+.container{max-width:1280px;margin:0 auto;padding:20px}
+
+.panel{
+  background:var(--surface);
+  border-radius:16px;
+  padding:16px;
+  box-shadow:0 6px 20px rgba(2,6,23,.08);
+}
+
+.premiumPanel{
+  background:linear-gradient(165deg,#ffffff,#f8faff);
+  border:1px solid rgba(148,163,184,.2);
+  box-shadow:0 12px 35px rgba(79,70,229,.12);
+}
+
+.topnav{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:16px}
+.topnav a{
+  padding:8px 12px;
+  border-radius:999px;
+  background:#e2e8f0;
+  font-weight:600;
+  transition:all .2s ease;
+}
+.topnav a:hover{background:#c7d2fe;color:#312e81;transform:translateY(-1px)}
+
+.grid{display:grid;gap:16px}
+.grid-2{grid-template-columns:repeat(auto-fit,minmax(260px,1fr))}
+
 .cta{background:var(--danger);border:0;color:#fff;padding:14px 18px;border-radius:12px;font-weight:700;cursor:pointer}
-.badge{display:inline-block;padding:4px 10px;border-radius:999px;font-size:12px;font-weight:700}.LOW{background:#dcfce7;color:#14532d}.MEDIUM{background:#fef9c3;color:#854d0e}.HIGH{background:#fee2e2;color:#991b1b}
-.mapWrap{height:calc(100vh - 130px);border-radius:16px;overflow:hidden}
-.form{display:grid;gap:10px} input,select,textarea{padding:10px;border-radius:10px;border:1px solid #cbd5e1}
+
+.badge{display:inline-block;padding:4px 10px;border-radius:999px;font-size:12px;font-weight:700}
+.LOW{background:#dcfce7;color:#14532d}
+.MEDIUM{background:#fef9c3;color:#854d0e}
+.HIGH{background:#fee2e2;color:#991b1b}
+
+.mapHeader{margin-bottom:16px}
+.mapLayout{display:grid;gap:16px;grid-template-columns:minmax(280px,360px) 1fr}
+.mapWrap{height:calc(100vh - 220px);border-radius:16px;overflow:hidden}
+.mapSidebar{height:calc(100vh - 220px);overflow:auto}
+
+.form{display:grid;gap:10px}
+input,select,textarea{padding:10px;border-radius:10px;border:1px solid #cbd5e1}
 .helper{color:var(--muted);font-size:14px}
 .routeCard{border-left:4px solid #94a3b8;padding-left:12px}
+
+.legendList{display:grid;gap:6px;margin:12px 0 16px}
+.legendList p{margin:0;display:flex;align-items:center;gap:8px}
+.legendDot{display:inline-block;width:12px;height:12px;border-radius:50%}
+.userDot{background:#14b8a6;box-shadow:0 0 0 4px rgba(20,184,166,.2)}
+.shelterDot{background:#22c55e}
+.incidentDot{background:#f97316}
+
+.quickStats{display:grid;grid-template-columns:repeat(1,minmax(0,1fr));gap:10px;margin-bottom:14px}
+.quickStats div{background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;padding:10px 12px}
+.quickStats strong{display:block;font-size:18px}
+.quickStats span{color:var(--muted);font-size:12px}
+
+.shelterCard{display:flex;justify-content:space-between;align-items:center;background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;padding:10px 12px;margin-bottom:10px;gap:10px}
+.shelterCard p{margin:4px 0 0;color:var(--muted);font-size:13px}
+.status{font-size:12px;font-weight:700;padding:4px 8px;border-radius:999px;white-space:nowrap}
+.status-open{background:#dcfce7;color:#166534}
+.status-full{background:#fee2e2;color:#991b1b}
+.status-closed{background:#e2e8f0;color:#334155}
+
+@media (max-width: 1024px){
+  .mapLayout{grid-template-columns:1fr}
+  .mapSidebar{height:auto}
+  .mapWrap{height:70vh}
+}

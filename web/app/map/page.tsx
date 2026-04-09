@@ -1,12 +1,18 @@
 import dynamic from 'next/dynamic';
 
-const DynamicMap = dynamic(() => import('../../components/IncidentsMap').then((mod) => mod.IncidentsMap), { ssr: false });
+const DynamicMap = dynamic(() => import('../../components/IncidentsMap').then((mod) => mod.IncidentsMap), {
+  ssr: false,
+});
 
 export default function MapPage() {
   return (
     <section>
-      <h1>Mapa em tempo real</h1>
-      <p className="helper">Mostra apenas incidentes VERIFICADOS e abrigos disponíveis.</p>
+      <header className="panel premiumPanel mapHeader">
+        <h1>Mapa operacional de Maputo</h1>
+        <p className="helper">
+          Visualize sua localização atual, incidentes verificados e os abrigos mais próximos em tempo real.
+        </p>
+      </header>
       <DynamicMap />
     </section>
   );
