@@ -26,4 +26,4 @@ async function bootstrap() {
   // console.log(`Url: ${process.env.DATABASE_URL}`);
 }
 
-bootstrap();
+void bootstrap();

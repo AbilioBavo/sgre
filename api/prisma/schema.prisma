@@ -18,6 +18,9 @@ model User {
   id               String   @id @default(uuid())
   name             String
   phone            String   @unique
+  email            String?  @unique
+  passwordHash     String?
+  deviceId         String?  @unique
   role             Role     @default(USER)
 
   // localização em tempo real
@@ -183,6 +186,10 @@ model Route {
 model RouteCache {
   id          String   @id @default(uuid())
 
+  deviceId    String?
+  shelterId   String?
+  kind        RouteKind @default(SAFEST)
+
   startLat    Float
   startLng    Float
   endLat      Float
@@ -192,7 +199,19 @@ model RouteCache {
   duration    Float
   riskScore   Float
 
+  // geometria GeoJSON serializada para projecção/intersecção
+  geometry    Unsupported("geometry(LineString, 4326)")
+  steps       Json?
+
   createdAt   DateTime @default(now())
+
+  @@index([deviceId])
+}
+
+enum RouteKind {
+  SAFEST
+  FASTEST
+  ALTERNATIVE
 }
 
 //ALERTS (COMUNICAÇÃO COM USUÁRIOS)

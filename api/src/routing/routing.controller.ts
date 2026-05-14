@@ -1,34 +1,23 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post } from '@nestjs/common';
+import { ComputeRouteDto } from './dto/compute-route.dto';
 import { RoutingService } from './routing.service';
-import { CreateRoutingDto } from './dto/create-routing.dto';
-import { UpdateRoutingDto } from './dto/update-routing.dto';
 
 @Controller('routing')
 export class RoutingController {
-  constructor(private readonly routingService: RoutingService) {}
+  constructor(private readonly routing: RoutingService) {}
 
-  @Post()
-  create(@Body() createRoutingDto: CreateRoutingDto) {
-    return this.routingService.create(createRoutingDto);
+  @Post('compute')
+  compute(@Body() dto: ComputeRouteDto) {
+    return this.routing.compute(dto);
   }
 
-  @Get()
-  findAll() {
-    return this.routingService.findAll();
+  @Post('recompute')
+  recompute(@Body() dto: ComputeRouteDto) {
+    return this.routing.recompute(dto);
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.routingService.findOne(+id);
-  }
-
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateRoutingDto: UpdateRoutingDto) {
-    return this.routingService.update(+id, updateRoutingDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.routingService.remove(+id);
+  @Get('instructions/:id')
+  instructions(@Param('id') id: string) {
+    return this.routing.getInstructions(id);
   }
 }

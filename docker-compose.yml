@@ -1,0 +1,60 @@
+services:
+  postgres:
+    image: postgis/postgis:16-3.4-alpine
+    container_name: sistema-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: sistema
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d sistema"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  api:
+    build:
+      context: ./api
+      dockerfile: Dockerfile
+    container_name: sistema-api
+    restart: unless-stopped
+    env_file:
+      - ./api/.env
+    environment:
+      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/sistema
+      PORT: 3001
+      OSRM_URL: http://osrm:5000
+      ORIGINS: http://localhost:3000,http://localhost:5173
+    ports:
+      - "3001:3001"
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  # Motor de rotas. Antes de subir, preparar dados:
+  #   ./scripts/prepare-osrm.sh
+  # Subir apenas com o profile "routing":
+  #   docker compose --profile routing up -d osrm
+  osrm:
+    image: osrm/osrm-backend:latest
+    container_name: sistema-osrm
+    restart: unless-stopped
+    profiles: ["routing"]
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./osrm/data:/data
+    command: >
+      osrm-routed
+      --algorithm mld
+      --max-matching-size 5000
+      --max-viaroute-size 10000
+      /data/${CITY_NAME:-maputo}.osrm
+
+volumes:
+  pgdata:
